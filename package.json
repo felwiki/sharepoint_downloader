@@ -1,0 +1,14 @@
+{
+  "name": "sharepoint_downloader",
+  "version": "0.1.0",
+  "main": "index.js",
+  "repository": "git@github.com:FEL-CVUT-Reupload/sharepoint_downloader.git",
+  "author": "Lukáš Cezner <coalzombik@gmail.com>",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "cli-progress": "^3.9.0",
+    "commander": "^7.1.0",
+    "puppeteer": "^7.1.0"
+  }
+}
