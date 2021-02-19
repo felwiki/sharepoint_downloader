@@ -96,7 +96,7 @@ async function download() {
 
 	fs.mkdirSync(path.dirname(options.output), { recursive: true });
 	fs.copyFileSync(download_path, options.output);
-	fs.rmSync(download_path);
+	fs.unlinkSync(download_path);
 
 	console.log("Downloaded " + options.output);
 }
