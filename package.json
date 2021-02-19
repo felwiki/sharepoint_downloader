@@ -5,7 +5,6 @@
   "repository": "git@github.com:FEL-CVUT-Reupload/sharepoint_downloader.git",
   "author": "Lukáš Cezner <coalzombik@gmail.com>",
   "license": "MIT",
-  "type": "module",
   "dependencies": {
     "cli-progress": "^3.9.0",
     "commander": "^7.1.0",

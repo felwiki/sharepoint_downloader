@@ -1,10 +1,10 @@
-import puppeteer from 'puppeteer';
-import cli_progress from 'cli-progress';
-import path from 'path';
-import fs from 'fs';
-import { Command } from 'commander';
+const puppeteer = require('puppeteer');
+const cli_progress = require('cli-progress');
+const path = require('path');
+const fs = require('fs');
+const commander = require('commander');
 
-const program = new Command();
+const program = new commander.Command();
 program.version('0.1.0');
 program.requiredOption('-i, --input <url>', 'Url address of sharepoint file');
 program.requiredOption('-u, --username <username>', 'ČVUT username (without domain)');
