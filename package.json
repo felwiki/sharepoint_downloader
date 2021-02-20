@@ -8,6 +8,6 @@
   "dependencies": {
     "cli-progress": "^3.9.0",
     "commander": "^7.1.0",
-    "puppeteer": "^7.1.0"
+    "puppeteer": "5.5.0"
   }
 }
