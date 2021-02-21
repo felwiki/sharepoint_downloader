@@ -4,13 +4,16 @@ const path = require('path');
 const fs = require('fs');
 const commander = require('commander');
 
+const LOGIN_ERROR_CODE = 7; //ERROR_CODE.NO_SESSION_INFO from destreamer
+
 const program = new commander.Command();
 program.version('0.1.0');
 program.requiredOption('-i, --input <url>', 'Url address of sharepoint file');
-program.requiredOption('-u, --username <username>', 'ČVUT username (without domain)');
-program.requiredOption('-p, --password <password>', 'Password to the account');
 program.requiredOption('-o, --output <filename>', 'Downloaded file path');
-program.option('--tmp <path>', 'Path tmp directory', '/tmp/');
+program.option('-u, --username <username>', 'ČVUT username (without domain)');
+program.option('-p, --password <password>', 'Password to the account');
+program.option('--tmp <path>', 'Path to tmp directory', '/tmp/');
+program.option('--chromeData <path>', 'Path to cache directory', '.chrome_data');
 
 program.parse(process.argv);
 const options = program.opts();
@@ -20,23 +23,38 @@ async function cvut_login(browser, page, username, password) {
 
 	await page.goto('https://campuscvut.sharepoint.com/', { waitUntil: 'load' });
 
-	await page.waitForSelector('input[type="email"]', { timeout: 3000 });
-	await page.keyboard.type(username + "@cvut.cz");
-	await page.click('input[type="submit"]');
-	console.log("Username filled");
+	if(!page.url().startsWith('https://login.microsoftonline.com')) {
+		console.log("User already logined");
+		return;
+	}
 
-	await browser.waitForTarget((target) => target.url().startsWith('https://logon.ms.cvut.cz'), { timeout: 15000 });
-	await page.waitForSelector('input[type="password"]', { timeout: 3000 });
-	await page.keyboard.type(password);
-	await page.click('#submitButton');
-	console.log("Password filled");
+	if(!username || !password) {
+		console.error("Invalid login credentials");
+		process.exit(LOGIN_ERROR_CODE);
+	}
 
-	await browser.waitForTarget((target) => target.url().startsWith('https://login.microsoftonline.com/'), { timeout: 15000 });
-	await page.waitForSelector('input[type="submit"]', { timeout: 3000 });
-	await page.click('input[type="submit"]');
-	console.log("Autologin skipped");
+	try {
+		await page.waitForSelector('input[type="email"]', { timeout: 3000 });
+		await page.keyboard.type(username + "@cvut.cz");
+		await page.click('input[type="submit"]');
+		console.log("Username filled");
 
-	await browser.waitForTarget((target) => target.url().startsWith('https://campuscvut.sharepoint.com/'), { timeout: 15000 });
+		await browser.waitForTarget((target) => target.url().startsWith('https://logon.ms.cvut.cz'), { timeout: 15000 });
+		await page.waitForSelector('input[type="password"]', { timeout: 3000 });
+		await page.keyboard.type(password);
+		await page.click('#submitButton');
+		console.log("Password filled");
+
+		await browser.waitForTarget((target) => target.url().startsWith('https://login.microsoftonline.com/'), { timeout: 15000 });
+		await page.waitForSelector('input[type="submit"]', { timeout: 3000 });
+		await page.click('input[type="submit"]');
+		console.log("Autologin skipped");
+
+		await browser.waitForTarget((target) => target.url().startsWith('https://campuscvut.sharepoint.com/'), { timeout: 15000 });
+	} catch (err) {
+		console.error("Invalid login");
+		process.exit(LOGIN_ERROR_CODE);
+	}
 	console.log("Login successful");
 }
 
@@ -80,7 +98,7 @@ async function sharepoint_download(browser, page, url, tmp_path) {
 async function download() {
 	const browser = await puppeteer.launch({
 		headless: true,
-		userDataDir: undefined,
+		userDataDir: options.chromeData,
 		devtools: true,
 		args: [
 			'--disable-dev-shm-usage',
