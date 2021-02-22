@@ -5,6 +5,8 @@ const fs = require('fs');
 const commander = require('commander');
 
 const LOGIN_ERROR_CODE = 7; //ERROR_CODE.NO_SESSION_INFO from destreamer
+const SELECTOR_TIMEOUT = 15000;
+const TARGET_TIMEOUT = 30000;
 
 const program = new commander.Command();
 program.version('0.1.0');
@@ -34,23 +36,23 @@ async function cvut_login(browser, page, username, password) {
 	}
 
 	try {
-		await page.waitForSelector('input[type="email"]', { timeout: 3000 });
+		await page.waitForSelector('input[type="email"]', { timeout: SELECTOR_TIMEOUT });
 		await page.keyboard.type(username + "@cvut.cz");
 		await page.click('input[type="submit"]');
 		console.log("Username filled");
 
-		await browser.waitForTarget((target) => target.url().startsWith('https://logon.ms.cvut.cz'), { timeout: 15000 });
-		await page.waitForSelector('input[type="password"]', { timeout: 3000 });
+		await browser.waitForTarget((target) => target.url().startsWith('https://logon.ms.cvut.cz'), { timeout: TARGET_TIMEOUT });
+		await page.waitForSelector('input[type="password"]', { timeout: SELECTOR_TIMEOUT });
 		await page.keyboard.type(password);
 		await page.click('#submitButton');
 		console.log("Password filled");
 
-		await browser.waitForTarget((target) => target.url().startsWith('https://login.microsoftonline.com/'), { timeout: 15000 });
-		await page.waitForSelector('input[type="submit"]', { timeout: 3000 });
+		await browser.waitForTarget((target) => target.url().startsWith('https://login.microsoftonline.com/'), { timeout: TARGET_TIMEOUT });
+		await page.waitForSelector('input[type="submit"]', { timeout: SELECTOR_TIMEOUT });
 		await page.click('input[type="submit"]');
 		console.log("Autologin skipped");
 
-		await browser.waitForTarget((target) => target.url().startsWith('https://campuscvut.sharepoint.com/'), { timeout: 15000 });
+		await browser.waitForTarget((target) => target.url().startsWith('https://campuscvut.sharepoint.com/'), { timeout: TARGET_TIMEOUT });
 	} catch (err) {
 		console.error("Invalid login");
 		process.exit(LOGIN_ERROR_CODE);
@@ -89,7 +91,7 @@ async function sharepoint_download(browser, page, url, tmp_path) {
 	console.log("Navigate to sharepoint website");
 	await page.goto(url, { waitUntil: 'load' });
 
-	await page.waitForSelector('button[data-automationid="download"]', { timeout: 3000 });
+	await page.waitForSelector('button[data-automationid="download"]', { timeout: SELECTOR_TIMEOUT });
 	await page.click('button[data-automationid="download"]');
 
 	return await download_promise;
